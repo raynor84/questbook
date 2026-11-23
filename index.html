@@ -91,6 +91,8 @@
     .habit-actions button { width:29px; height:29px; border-radius:9px; border:1px solid var(--line); background:#fff; font-weight:800; }
     .habit-actions .plus { color:#437250; }
     .habit-actions .minus { color:#c46e5b; }
+    .habit-actions .delete-task, .delete-task { width:29px; height:29px; border:1px solid var(--line); border-radius:9px; background:#fff; color:#9a6258; font-weight:700; }
+    .delete-task:hover { border-color:#d9aaa0; background:#fff5f2; }
     .habit-actions button:hover { transform:translateY(-1px); box-shadow:0 3px 8px #0000000d; }
     .habit-score { min-width:31px; text-align:center; font-size:10px; color:#8a9289; font-weight:700; }
     .empty { color:#9aa198; text-align:center; padding:20px 10px; font-size:12px; }
@@ -284,9 +286,9 @@
       $('#progress-copy').textContent = `${dailyDone} von ${state.dailies.length} täglichen Quests`;
       $('#progress-bar').style.width = `${progress}%`;
       $('#habit-list').innerHTML = state.habits.length ? state.habits.map(habit=>`
-        <div class="habit-row"><div><div class="task-title">${esc(habit.name)}</div><div class="task-meta">${stars(habit.difficulty)}<span>Heute ${habit.score>0?'+':''}${habit.score} Mal</span></div></div><div class="habit-actions"><button class="minus" data-habit="${habit.id}" data-delta="-1" aria-label="${esc(habit.name)} nicht geschafft">−</button><span class="habit-score">${habit.score>0?'+':''}${habit.score}</span><button class="plus" data-habit="${habit.id}" data-delta="1" aria-label="${esc(habit.name)} geschafft">＋</button></div></div>`).join('') : empty('Noch keine Gewohnheiten. Füge deine erste hinzu.');
+        <div class="habit-row"><div><div class="task-title">${esc(habit.name)}</div><div class="task-meta">${stars(habit.difficulty)}<span>Heute ${habit.score>0?'+':''}${habit.score} Mal</span></div></div><div class="habit-actions"><button class="minus" data-habit="${habit.id}" data-delta="-1" aria-label="${esc(habit.name)} nicht geschafft">−</button><span class="habit-score">${habit.score>0?'+':''}${habit.score}</span><button class="plus" data-habit="${habit.id}" data-delta="1" aria-label="${esc(habit.name)} geschafft">＋</button><button class="delete-task" data-delete="habit" data-id="${habit.id}" data-name="${esc(habit.name)}" aria-label="${esc(habit.name)} löschen" title="Löschen">×</button></div></div>`).join('') : empty('Noch keine Gewohnheiten. Füge deine erste hinzu.');
       const renderTasks = (items, kind) => items.length ? items.map(task=>`
-        <div class="task ${task.done?'done':''}"><button class="check" data-task="${task.id}" data-kind="${kind}" aria-label="${task.done?'Wieder öffnen':'Erledigt markieren'}">${task.done?'✓':''}</button><div><div class="task-title">${esc(task.name)}</div><div class="task-meta">${stars(task.difficulty)}<span>${task.difficulty===1?'Leicht':task.difficulty===3?'Anspruchsvoll':'Mittel'}</span></div></div><div class="task-reward">+${task.difficulty*5} XP&nbsp; · &nbsp;+${task.difficulty*2} ✦</div></div>`).join('') : empty(kind==='daily'?'Keine täglichen Aufgaben.':'Alles erledigt — oder füge eine Quest hinzu.');
+        <div class="task ${task.done?'done':''}"><button class="check" data-task="${task.id}" data-kind="${kind}" aria-label="${task.done?'Wieder öffnen':'Erledigt markieren'}">${task.done?'✓':''}</button><div><div class="task-title">${esc(task.name)}</div><div class="task-meta">${stars(task.difficulty)}<span>${task.difficulty===1?'Leicht':task.difficulty===3?'Anspruchsvoll':'Mittel'}</span></div></div><div class="task-reward">+${task.difficulty*5} XP&nbsp; · &nbsp;+${task.difficulty*2} ✦</div><button class="delete-task" data-delete="${kind}" data-id="${task.id}" data-name="${esc(task.name)}" aria-label="${esc(task.name)} löschen" title="Löschen">×</button></div>`).join('') : empty(kind==='daily'?'Keine täglichen Aufgaben.':'Alles erledigt — oder füge eine Quest hinzu.');
       $('#daily-list').innerHTML = renderTasks(state.dailies,'daily');
       $('#todo-list').innerHTML = renderTasks(state.todos,'todo');
       document.querySelectorAll('.buy').forEach(button=>button.disabled=state.gold<Number(button.dataset.buy));
@@ -299,6 +301,8 @@
       while(state.xp>=100){state.xp-=100;state.level++;state.hp=Math.min(10,state.hp+2);toast(`Stufenaufstieg! Du bist jetzt Level ${state.level} ✨`);}
     }
     document.addEventListener('click', event=>{
+      const deleteButton=event.target.closest('[data-delete]');
+      if(deleteButton){if(!confirm(`Möchtest du „${deleteButton.dataset.name}“ wirklich löschen?`))return;const collection=deleteButton.dataset.delete==='habit'?'habits':deleteButton.dataset.delete==='daily'?'dailies':'todos';state[collection]=state[collection].filter(item=>item.id!==deleteButton.dataset.id);render();toast('Aufgabe gelöscht.');return;}
       const habitButton=event.target.closest('[data-habit]');
       if(habitButton){const habit=state.habits.find(item=>item.id===habitButton.dataset.habit);const delta=Number(habitButton.dataset.delta);habit.score+=delta;if(delta>0){reward(habit.difficulty);toast('Gut gemacht! +XP und Gold verdient.');}else{state.hp=Math.max(0,state.hp-1);toast('Ein kleiner Rückschlag — morgen ist ein neuer Versuch.');}render();return;}
       const taskButton=event.target.closest('[data-task]');
