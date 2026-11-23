@@ -160,8 +160,8 @@
       <div class="brand"><span class="brand-mark">✦</span><span>questbook</span></div>
       <section class="profile" aria-label="Spielerprofil">
         <div class="profile-top"><div class="avatar">🧙🏻‍♀️</div><div><div class="name">Mira Morgenstern</div><div class="classline">Waldläuferin · Stufe <span id="level-sidebar">12</span></div></div><span class="level">Lv. <span id="level">12</span></span></div>
-        <div class="bar-label"><span>Lebenspunkte</span><span id="hp-label">8 / 10</span></div><div class="bar hp"><span id="hp-bar" style="width:80%"></span></div>
-        <div class="bar-label"><span>Erfahrung</span><span id="xp-label">72 / 100 XP</span></div><div class="bar"><span id="xp-bar" style="width:72%"></span></div>
+        <div class="bar-label"><span>Lebenspunkte</span><span id="hp-label">0 / 10</span></div><div class="bar hp"><span id="hp-bar" style="width:0%"></span></div>
+        <div class="bar-label"><span>Erfahrung</span><span id="xp-label">0 / 100 XP</span></div><div class="bar"><span id="xp-bar" style="width:0%"></span></div>
       </section>
       <nav class="nav" aria-label="Hauptnavigation">
         <button class="active" data-scroll="today"><span class="nav-ico">☀</span>Heute</button>
@@ -199,7 +199,7 @@
         <div class="stack">
           <section class="card" id="rewards">
             <div class="card-head"><div><h2>Deine Belohnungen</h2><p>Gold gegen echte Pausen tauschen.</p></div><span class="count">Shop</span></div>
-            <div class="quest-banner"><div class="quest-icon">🗺️</div><div><strong>Dein nächstes Abenteuer</strong><span>Noch 28 XP bis zur nächsten Stufe</span></div></div>
+            <div class="quest-banner"><div class="quest-icon">🗺️</div><div><strong>Dein nächstes Abenteuer</strong><span>Noch 100 XP bis zur nächsten Stufe</span></div></div>
             <div class="shop-list" id="shop-list">
               <div class="shop-item"><div class="shop-emoji">☕</div><div><div class="shop-name">Lieblingskaffee</div><div class="shop-desc">Ein Moment nur für dich</div></div><button class="buy" data-buy="15">15 ✦</button></div>
               <div class="shop-item"><div class="shop-emoji">🎧</div><div><div class="shop-name">Eine Playlist lang Pause</div><div class="shop-desc">Kopf aus, Musik an</div></div><button class="buy" data-buy="25">25 ✦</button></div>
@@ -236,7 +236,7 @@
   </div>
   <script>
     const seed = {
-      version:2, gold:132, xp:72, level:0, hp:8, streak:6,
+      version:3, gold:132, xp:0, level:0, hp:0, streak:6,
       habits:[
         {id:'h1',name:'Ein Glas Wasser trinken',score:3,difficulty:1},
         {id:'h2',name:'10 Minuten an die frische Luft',score:2,difficulty:2},
@@ -257,6 +257,7 @@
     let state;
     try { state = JSON.parse(localStorage.getItem('questbook-save')) || clone(seed); } catch { state = clone(seed); }
     if (!state.version) { state.level=0; state.version=2; }
+    if (state.version < 3) { state.hp=0; state.xp=0; state.version=3; }
     const localDay = () => { const date=new Date(); return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`; };
     if (state.day !== localDay()) { state.dailies.forEach(task=>task.done=false); state.day=localDay(); }
     const $ = selector => document.querySelector(selector);
